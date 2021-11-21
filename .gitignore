@@ -1,3 +1,14 @@
+# build directory
+build/*
+**/Debug/*
+**/Release/*
+.vs/*
+VirtualWebcam.VC.db
+ipch/BASECLASSES-ca73d73d/BASECLASSES-f4224c33.ipch
+ipch/VIRTUALWEBCAM-9141c117/VIRTUALWEBCAM-b4498da0.ipch
+/ipch
+/VirtualWebcam.VC.VC.opendb
+
 # Prerequisites
 *.d
 
@@ -30,3 +41,4 @@
 *.exe
 *.out
 *.app
+

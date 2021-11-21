@@ -1,0 +1,64 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VirtualWebcam", "VirtualWebcam\VirtualWebcam.vcxproj", "{9BDAE9B9-72E7-4410-BBA1-2DF554597A1E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8B81C8BF-0E6F-4702-82CB-090D45E8E184} = {8B81C8BF-0E6F-4702-82CB-090D45E8E184}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "baseclasses", "baseclasses\baseclasses.vcxproj", "{8B81C8BF-0E6F-4702-82CB-090D45E8E184}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "playcap", "playcap\playcap.vcxproj", "{F4529D41-0379-43C2-8E44-6A71BE5B8EC9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WebcamGateway", "WebcamGateway\WebcamGateway.vcxproj", "{A21A66C8-6D93-431E-97AE-3CF19996672A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9BDAE9B9-72E7-4410-BBA1-2DF554597A1E}.Debug|x64.ActiveCfg = Debug|x64
+		{9BDAE9B9-72E7-4410-BBA1-2DF554597A1E}.Debug|x64.Build.0 = Debug|x64
+		{9BDAE9B9-72E7-4410-BBA1-2DF554597A1E}.Debug|x86.ActiveCfg = Debug|Win32
+		{9BDAE9B9-72E7-4410-BBA1-2DF554597A1E}.Debug|x86.Build.0 = Debug|Win32
+		{9BDAE9B9-72E7-4410-BBA1-2DF554597A1E}.Release|x64.ActiveCfg = Release|x64
+		{9BDAE9B9-72E7-4410-BBA1-2DF554597A1E}.Release|x64.Build.0 = Release|x64
+		{9BDAE9B9-72E7-4410-BBA1-2DF554597A1E}.Release|x86.ActiveCfg = Release|Win32
+		{9BDAE9B9-72E7-4410-BBA1-2DF554597A1E}.Release|x86.Build.0 = Release|Win32
+		{8B81C8BF-0E6F-4702-82CB-090D45E8E184}.Debug|x64.ActiveCfg = Debug|x64
+		{8B81C8BF-0E6F-4702-82CB-090D45E8E184}.Debug|x64.Build.0 = Debug|x64
+		{8B81C8BF-0E6F-4702-82CB-090D45E8E184}.Debug|x86.ActiveCfg = Debug|Win32
+		{8B81C8BF-0E6F-4702-82CB-090D45E8E184}.Debug|x86.Build.0 = Debug|Win32
+		{8B81C8BF-0E6F-4702-82CB-090D45E8E184}.Release|x64.ActiveCfg = Release|x64
+		{8B81C8BF-0E6F-4702-82CB-090D45E8E184}.Release|x64.Build.0 = Release|x64
+		{8B81C8BF-0E6F-4702-82CB-090D45E8E184}.Release|x86.ActiveCfg = Release|Win32
+		{8B81C8BF-0E6F-4702-82CB-090D45E8E184}.Release|x86.Build.0 = Release|Win32
+		{F4529D41-0379-43C2-8E44-6A71BE5B8EC9}.Debug|x64.ActiveCfg = Debug|x64
+		{F4529D41-0379-43C2-8E44-6A71BE5B8EC9}.Debug|x64.Build.0 = Debug|x64
+		{F4529D41-0379-43C2-8E44-6A71BE5B8EC9}.Debug|x86.ActiveCfg = Debug|Win32
+		{F4529D41-0379-43C2-8E44-6A71BE5B8EC9}.Debug|x86.Build.0 = Debug|Win32
+		{F4529D41-0379-43C2-8E44-6A71BE5B8EC9}.Release|x64.ActiveCfg = Release|x64
+		{F4529D41-0379-43C2-8E44-6A71BE5B8EC9}.Release|x64.Build.0 = Release|x64
+		{F4529D41-0379-43C2-8E44-6A71BE5B8EC9}.Release|x86.ActiveCfg = Release|Win32
+		{F4529D41-0379-43C2-8E44-6A71BE5B8EC9}.Release|x86.Build.0 = Release|Win32
+		{A21A66C8-6D93-431E-97AE-3CF19996672A}.Debug|x64.ActiveCfg = Debug|x64
+		{A21A66C8-6D93-431E-97AE-3CF19996672A}.Debug|x64.Build.0 = Debug|x64
+		{A21A66C8-6D93-431E-97AE-3CF19996672A}.Debug|x86.ActiveCfg = Debug|Win32
+		{A21A66C8-6D93-431E-97AE-3CF19996672A}.Debug|x86.Build.0 = Debug|Win32
+		{A21A66C8-6D93-431E-97AE-3CF19996672A}.Release|x64.ActiveCfg = Release|x64
+		{A21A66C8-6D93-431E-97AE-3CF19996672A}.Release|x64.Build.0 = Release|x64
+		{A21A66C8-6D93-431E-97AE-3CF19996672A}.Release|x86.ActiveCfg = Release|Win32
+		{A21A66C8-6D93-431E-97AE-3CF19996672A}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0062E29E-B70B-457B-946B-04E8975451B1}
+	EndGlobalSection
+EndGlobal
