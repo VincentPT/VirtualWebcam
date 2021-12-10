@@ -2,6 +2,8 @@
 #include "WebcamGateWay.h"
 #include "GatewayOutputPin.h"
 
+const wchar_t* PHYSICAL_WEB_CAMERA_NAME = L"HP HD Camera";
+
 /************************************************************************************************************
 * 
 * CWebcamGateWay implementation
@@ -24,7 +26,7 @@ CWebcamGateWay::CWebcamGateWay(LPUNKNOWN punk, HRESULT *phr)
     : CSource(g_wszVirtualCamera, punk, CLSID_VIRTUALCAMERAFILTER),
     _pVideoInputFilter(NULL)
 {
-    *phr = OpenOriginalVideoDevice(L"HP HD Camera");
+    *phr = OpenOriginalVideoDevice(PHYSICAL_WEB_CAMERA_NAME);
 
     if(SUCCEEDED(*phr)) {
         auto previewPin = new GatewayOutputPin(phr, this, _pVideoInputFilter);

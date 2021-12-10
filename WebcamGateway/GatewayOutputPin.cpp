@@ -23,6 +23,7 @@ const REFERENCE_TIME rtDefaultFrameLength = FPS_10;
 /************************************************************************************************************
 *
 * Sample callback class
+* frame data of physical camera will send to be caught here
 *
 ************************************************************************************************************/
 class SampleGrabberCallback : public ISampleGrabberCB {
@@ -75,6 +76,7 @@ public:
 
 
     //This method is meant to have less overhead
+    //frame data callback handler - currently used
     //------------------------------------------------
     STDMETHODIMP SampleCB(double, IMediaSample *pSample) {
         //if (WaitForSingleObject(hEvent, 0) == WAIT_OBJECT_0) return S_OK;
@@ -100,6 +102,7 @@ public:
 
 
     //This method is meant to have more overhead
+    // frame data callback handler - not used
     STDMETHODIMP BufferCB(double, BYTE *, long) {
         return E_NOTIMPL;
     }
@@ -176,6 +179,7 @@ GatewayOutputPin::~GatewayOutputPin()
 
 //
 // GetMediaType
+// Media type of physical webcam is forwarded to virtual webcam
 //
 HRESULT GatewayOutputPin::GetMediaType(int iPosition, CMediaType* pmt)
 {
@@ -226,8 +230,7 @@ HRESULT GatewayOutputPin::GetMediaType(int iPosition, CMediaType* pmt)
 //
 // CheckMediaType
 //
-// We will accept 8, 16, 24 or 32 bit video formats, in any
-// image size that gives room to bounce.
+// We will accept video formats based on supported format of physical webcam
 // Returns E_INVALIDARG if the mediatype is not acceptable
 //
 HRESULT GatewayOutputPin::CheckMediaType(const CMediaType * pmt)
@@ -329,6 +332,7 @@ HRESULT GatewayOutputPin::FillBuffer(IMediaSample * pSample)
 
 	VIDEOINFOHEADER * pVih = (VIDEOINFOHEADER*)m_mt.pbFormat;
 
+    // the buffer processing function is do nothing except copy source buffer to sample's buffer
     BufferProcessFunc bufferProcessFunc = [=](const unsigned char* inputBuffer, int size) {
         HRESULT hr = S_OK;
 
@@ -341,8 +345,7 @@ HRESULT GatewayOutputPin::FillBuffer(IMediaSample * pSample)
         return hr;
     };
 
-
-
+    // request the source buffer from the physical webcam
     ASSERT(_sgCallback);
     HRESULT hr = _sgCallback->requestBuffer(bufferProcessFunc);
     if (FAILED(hr)) {
@@ -435,6 +438,7 @@ HRESULT GatewayOutputPin::QuerySupported(REFGUID guidPropSet, DWORD dwPropID,
 	return S_OK;
 }
 
+// check if the video format is supported by physical webcam
 HRESULT GatewayOutputPin::CheckFormat(const AM_MEDIA_TYPE *pmt) {
     // the new format must be same the support format
     if (pmt->formattype != _inputMediaType.formattype) {
@@ -471,6 +475,8 @@ HRESULT GatewayOutputPin::CheckFormat(const AM_MEDIA_TYPE *pmt) {
 //////////////////////////////////////////////////////////////////////////
 //  IAMStreamConfig
 //////////////////////////////////////////////////////////////////////////
+
+// called after media type is accepted, at this time just reconnect the pin.
 HRESULT STDMETHODCALLTYPE GatewayOutputPin::SetFormat(
     /* [in] */ AM_MEDIA_TYPE *pmt) {
     
@@ -497,6 +503,7 @@ HRESULT STDMETHODCALLTYPE GatewayOutputPin::GetFormat(
     return S_OK;
 }
 
+// video capabilities is forward from physical webcam
 HRESULT STDMETHODCALLTYPE GatewayOutputPin::GetNumberOfCapabilities(
     /* [annotation][out] */
     _Out_  int *piCount,
@@ -507,6 +514,7 @@ HRESULT STDMETHODCALLTYPE GatewayOutputPin::GetNumberOfCapabilities(
     return S_OK;
 }
 
+// video capability information is based on physical webcam
 HRESULT STDMETHODCALLTYPE GatewayOutputPin::GetStreamCaps(
     /* [in] */ int iIndex,
     /* [annotation][out] */
@@ -564,7 +572,7 @@ HRESULT STDMETHODCALLTYPE GatewayOutputPin::GetStreamCaps(
 
 /************************************************************************************************************
 *
-* CWebcamGateWay implementation
+* Use directshow to open the physical webcam
 *
 ************************************************************************************************************/
 HRESULT GatewayOutputPin::SetupStream(IBaseFilter* videoInputDevice) {
@@ -750,6 +758,7 @@ void GatewayOutputPin::ConvertToSupportedFormat(AM_MEDIA_TYPE* dst, const AM_MED
     dst->formattype = FORMAT_VideoInfo;
 }
 
+// start the physical webcam
 HRESULT GatewayOutputPin::StartStream() {
     //RENDER STREAM//
     //This is where the stream gets put together.
@@ -777,6 +786,9 @@ HRESULT GatewayOutputPin::StartStream() {
     return S_OK;
 }
 
+
+// when client offer a new video format and it is accepted.
+// this function need to call to update the frame size and buffers
 void GatewayOutputPin::UpdateSize() {
     if (!_formatChanged) {
         DbgLog((LOG_TRACE, 3, TEXT("SETUP: Error device size should not be set more than once")));
@@ -816,6 +828,7 @@ void GatewayOutputPin::UpdateSize() {
     }
 }
 
+// called when client start the stream of virtual webcam
 HRESULT GatewayOutputPin::OnThreadCreate(void) {
     UpdateSize();
 
@@ -828,12 +841,14 @@ HRESULT GatewayOutputPin::OnThreadCreate(void) {
     return _lastStartResult;
 }
 
+// called when client stop the stream of virtual webcam
 HRESULT GatewayOutputPin::OnThreadDestroy(void) {
     ASSERT(_pControl);
     return _pControl->Stop();
     //return NOERROR;
 }
 
+// begin push the frame data of virtual webcam to client
 HRESULT GatewayOutputPin::OnThreadStartPlay(void) {
     ASSERT(_pControl);
     return _pControl->Run();
