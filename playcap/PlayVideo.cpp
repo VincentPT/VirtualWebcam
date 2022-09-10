@@ -90,7 +90,7 @@ HRESULT HandleGraphEvent(void);
 HRESULT AddGraphToRot(IUnknown *pUnkGraph, DWORD *pdwRegister);
 void RemoveGraphFromRot(DWORD pdwRegister);
 
-HRESULT CaptureVideo(IBaseFilter* captureDevice)
+HRESULT CaptureVideo(IBaseFilter* captureDevice, GUID captureMode, int selectedFormat)
 {
     HRESULT hr;
     IBaseFilter *pSrcFilter = captureDevice;
@@ -131,10 +131,58 @@ HRESULT CaptureVideo(IBaseFilter* captureDevice)
 
     //CMyTranformFilter* myFilter = new CMyTranformFilter(NULL, &hr);
     //hr = g_pGraph->AddFilter(myFilter, L"My Transform filter");
+		
+	IAMStreamConfig *_streamConf = NULL;
+
+	// get stream again prefer to preview mode
+	hr = g_pCapture->FindInterface(&captureMode, &MEDIATYPE_Video, captureDevice, IID_IAMStreamConfig, (void **)&_streamConf);
+	if (FAILED(hr)) {
+		return hr;
+	}
+	if (!_streamConf) {
+		return E_FAIL;
+	}
+
+	int streamFormatSize = 0;
+	int _streamCaps = 0;
+	hr = _streamConf->GetNumberOfCapabilities(&_streamCaps, &streamFormatSize);
+	if (FAILED(hr)) {
+		return hr;
+	}
+
+	if (streamFormatSize != sizeof(VIDEO_STREAM_CONFIG_CAPS)) {
+		return E_FAIL;
+	}
+
+	HRESULT tmpHr;
+	VIDEO_STREAM_CONFIG_CAPS scc;
+	AM_MEDIA_TYPE* pmt;
+	bool formatSet = false;
+	for (int i = 0; i < _streamCaps; ++i) {
+		pmt = NULL;
+		tmpHr = _streamConf->GetStreamCaps(i, &pmt, (BYTE*)&scc);
+		if (SUCCEEDED(tmpHr)) {
+			if (i == selectedFormat) {
+				tmpHr = _streamConf->SetFormat(pmt);
+				if (SUCCEEDED(hr)) {
+					formatSet = true;
+				}
+				break;
+			}
+
+			DeleteMediaType(pmt);
+		}
+	}
+
+	SAFE_RELEASE(_streamConf);
+
+	if (!formatSet) {
+		Msg(TEXT("Couldn't not set the selected format, let the stream be\r\n"));
+	}
 
     // Render the preview pin on the video capture filter
     // Use this instead of g_pGraph->RenderFile
-    hr = g_pCapture->RenderStream(&PIN_CATEGORY_PREVIEW, &MEDIATYPE_Video,
+    hr = g_pCapture->RenderStream(&captureMode, &MEDIATYPE_Video,
         pSrcFilter, NULL, NULL);
     if (FAILED(hr))
     {

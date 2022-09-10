@@ -230,6 +230,9 @@ STDMETHODIMP RandomCapturePin::NonDelegatingQueryInterface(REFIID riid,
     if (riid == IID_IAMStreamConfig) {
         return GetInterface((IAMStreamConfig*)this, ppv);
     }
+	if (riid == IID_IAMVideoProcAmp) {
+		return CSourceStream::NonDelegatingQueryInterface(riid, ppv);
+	}
 
 	return CSourceStream::NonDelegatingQueryInterface(riid, ppv);
 }

@@ -6,7 +6,7 @@
 #if defined(_WIN64)
 // {C07EE3A7-4EA4-4A25-BB8E-0FFEE7AEB140}
 const GUID CLSID_VIRTUALCAMERAFILTER =
-{ 0xc07ee3a7, 0x4ea4, 0x4a25,{ 0xbb, 0x8e, 0xf, 0xfe, 0xe7, 0xae, 0xb1, 0x40 } };
+{ 0x9b140680, 0x43e5, 0x45e8,{ 0xb5, 0x42, 0x49, 0x17, 0xc0, 0x8f, 0xae, 0x69 } };
 
 #else
 // {7DEDD193-2410-48DB-BBC5-A6B817FC796F}
@@ -40,6 +40,10 @@ STDMETHODIMP CVirtualVideoCamera::NonDelegatingQueryInterface(REFIID riid,
 {
 	if (riid == CLSID_VIRTUALCAMERAFILTER) {
 		return GetInterface((IBaseFilter*)this, ppv);
+	}
+
+	if (riid == IID_IAMVideoProcAmp) {
+		return CSource::NonDelegatingQueryInterface(riid, ppv);
 	}
 	
 	return CSource::NonDelegatingQueryInterface(riid, ppv);

@@ -28,9 +28,20 @@ public:
 private:
     void ListCaptureDevices();
     void ClearDeviceList();
+	HRESULT ObtainVideoCapbilities(IBaseFilter* pVideoInputDevice);
 private:
     IBaseFilter* m_captureDevice;
     CArray<IMoniker*> m_deviceReferences;
+	int m_selectedFormat;
+	GUID m_CaptureMode;
 public:
     afx_msg void OnBnClickedOk();
+	afx_msg void OnCbnSelchangeCombo1();
+	afx_msg void OnCbnSelchangeCombo2();
+
+	GUID GetCaptureMode() const;
+	int GetSelectedFormat() const;
+
+	CComboBox cbVideoCaps;
+	BOOL streamCaptureMode;
 };

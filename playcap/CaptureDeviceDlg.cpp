@@ -5,7 +5,7 @@
 #include "playcap.h"
 #include "CaptureDeviceDlg.h"
 #include "afxdialogex.h"
-
+#include <streams.h>
 #include <strsafe.h>
 #include <comdef.h>
 
@@ -15,8 +15,11 @@ IMPLEMENT_DYNAMIC(CCaptureDeviceDlg, CDialogEx)
 
 CCaptureDeviceDlg::CCaptureDeviceDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_CAPTURE_DEVICES, pParent)
+	, streamCaptureMode(FALSE)
 {
     m_captureDevice = NULL;
+	m_CaptureMode = PIN_CATEGORY_PREVIEW;
+	m_selectedFormat = -1;
 }
 
 CCaptureDeviceDlg::~CCaptureDeviceDlg()
@@ -27,13 +30,17 @@ CCaptureDeviceDlg::~CCaptureDeviceDlg()
 
 void CCaptureDeviceDlg::DoDataExchange(CDataExchange* pDX)
 {
-    CDialogEx::DoDataExchange(pDX);
-    DDX_Control(pDX, IDC_COMBO1, cbDeviceList);
+	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_COMBO1, cbDeviceList);
+	DDX_Control(pDX, IDC_COMBO2, cbVideoCaps);
+	DDX_Check(pDX, IDC_CHECK1, streamCaptureMode);
 }
 
 
 BEGIN_MESSAGE_MAP(CCaptureDeviceDlg, CDialogEx)
     ON_BN_CLICKED(IDOK, &CCaptureDeviceDlg::OnBnClickedOk)
+	ON_CBN_SELCHANGE(IDC_COMBO1, &CCaptureDeviceDlg::OnCbnSelchangeCombo1)
+	ON_CBN_SELCHANGE(IDC_COMBO2, &CCaptureDeviceDlg::OnCbnSelchangeCombo2)
 END_MESSAGE_MAP()
 
 
@@ -145,6 +152,7 @@ void CCaptureDeviceDlg::ListCaptureDevices()
     }
     if (m_deviceReferences.GetCount()) {
         cbDeviceList.SetCurSel(0);
+		OnCbnSelchangeCombo1();
     }
 
     SAFE_RELEASE(pMoniker);
@@ -183,4 +191,134 @@ void CCaptureDeviceDlg::OnBnClickedOk()
     }
     // TODO: Add your control notification handler code here
     CDialogEx::OnOK();
+}
+
+HRESULT CCaptureDeviceDlg::ObtainVideoCapbilities(IBaseFilter* pVideoInputDevice) {
+	cbVideoCaps.ResetContent();
+	streamCaptureMode = TRUE;
+
+	GUID _captureMode = PIN_CATEGORY_CAPTURE;
+	ICaptureGraphBuilder2* _pCaptureGraph;
+	IGraphBuilder* _pGraph;                    // Graph builder object
+	IAMStreamConfig* _streamConf;
+
+	// CREATE THE GRAPH BUILDER //
+	// Create the filter graph manager and query for interfaces.
+	HRESULT hr = CoCreateInstance(CLSID_CaptureGraphBuilder2, NULL, CLSCTX_INPROC_SERVER, IID_ICaptureGraphBuilder2, (void **)&_pCaptureGraph);
+	if (FAILED(hr))    // FAILED is a macro that tests the return value
+	{
+		return hr;
+	}
+
+	//FILTER GRAPH MANAGER//
+	// Create the Filter Graph Manager.
+	hr = CoCreateInstance(CLSID_FilterGraph, 0, CLSCTX_INPROC_SERVER, IID_IGraphBuilder, (void**)&_pGraph);
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	//SET THE FILTERGRAPH//
+	hr = _pCaptureGraph->SetFiltergraph(_pGraph);
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	hr = _pGraph->AddFilter(pVideoInputDevice, TEXT("Temp filter"));
+	if (FAILED(hr)) {		
+		return hr;
+	}
+
+	//LOOK FOR PREVIEW PIN IF THERE IS NONE THEN WE USE CAPTURE PIN AND THEN SMART TEE TO PREVIEW
+	IAMStreamConfig *streamConfTest = NULL;
+	hr = _pCaptureGraph->FindInterface(&PIN_CATEGORY_PREVIEW, &MEDIATYPE_Video, pVideoInputDevice, IID_IAMStreamConfig, (void **)&streamConfTest);
+	if (SUCCEEDED(hr)) {
+		_captureMode = PIN_CATEGORY_PREVIEW;
+		streamCaptureMode = FALSE;		
+		streamConfTest->Release();
+		streamConfTest = NULL;
+	}
+	// update data to control
+	UpdateData(FALSE);
+	m_CaptureMode = _captureMode;
+
+	// get stream again prefer to preview mode
+	hr = _pCaptureGraph->FindInterface(&_captureMode, &MEDIATYPE_Video, pVideoInputDevice, IID_IAMStreamConfig, (void **)&_streamConf);
+	if (FAILED(hr)) {		
+		return hr;
+	}
+	if (!_streamConf) {
+		return E_FAIL;
+	}
+
+	int streamFormatSize = 0;
+	int _streamCaps = 0;
+	hr = _streamConf->GetNumberOfCapabilities(&_streamCaps, &streamFormatSize);
+	if (FAILED(hr)) {		
+		return hr;
+	}
+
+	if (streamFormatSize != sizeof(VIDEO_STREAM_CONFIG_CAPS)) {
+		return E_FAIL;
+	}
+	VIDEO_STREAM_CONFIG_CAPS scc;
+	AM_MEDIA_TYPE* pmt;
+	for (int i = 0; i < _streamCaps; ++i) {
+		pmt = NULL;
+		hr = _streamConf->GetStreamCaps(i, &pmt, (BYTE*)&scc);
+		if (SUCCEEDED(hr)) {
+			DECLARE_PTR(VIDEOINFOHEADER, pvio, pmt->pbFormat);
+
+			CString frameFormatStr;
+			frameFormatStr.Format(TEXT("%dx%d %dfps"), HEADER(pvio)->biWidth, HEADER(pvio)->biHeight, UNITS/pvio->AvgTimePerFrame);
+
+			int idx = cbVideoCaps.AddString(frameFormatStr);
+			//cbVideoCaps.SetItemDataPtr(idx, nullptr);
+			
+			DeleteMediaType(pmt);
+		}
+	}
+
+	if (_streamCaps) {
+		cbVideoCaps.SetCurSel(0);
+	}
+
+	SAFE_RELEASE(_pCaptureGraph);    // Capture graph builder object
+	SAFE_RELEASE(_pGraph);                    // Graph builder object
+	SAFE_RELEASE(_streamConf);
+	return S_OK;
+}
+
+
+void CCaptureDeviceDlg::OnCbnSelchangeCombo1()
+{
+	int idx = cbDeviceList.GetCurSel();
+	if (idx >= 0) {
+		IMoniker* pMoniker = (IMoniker*)cbDeviceList.GetItemDataPtr(idx);
+		// Bind Moniker to a filter object
+		IBaseFilter* captureDevice = nullptr;
+
+		auto hr = pMoniker->BindToObject(0, 0, IID_IBaseFilter, (void**)&captureDevice);
+		if (SUCCEEDED(hr))
+		{			
+			ObtainVideoCapbilities(captureDevice);
+			SAFE_RELEASE(captureDevice);
+		}		
+	}
+}
+
+GUID CCaptureDeviceDlg::GetCaptureMode() const {
+	return m_CaptureMode;
+}
+
+int CCaptureDeviceDlg::GetSelectedFormat() const {
+	return m_selectedFormat;
+}
+
+
+void CCaptureDeviceDlg::OnCbnSelchangeCombo2()
+{
+	int idx = cbVideoCaps.GetCurSel();
+	m_selectedFormat = idx;
 }

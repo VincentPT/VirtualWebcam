@@ -41,7 +41,7 @@ void Msg(TCHAR *szFormat, ...);
 enum PLAYSTATE { Stopped, Paused, Running, Init };
 
 
-
+#define DECLARE_PTR(type, ptr, expr) type* ptr = (type*)(expr);
 
 
 

@@ -204,6 +204,13 @@ void WINAPI DbgInitKeyLevels(HKEY hKey, bool fTakeMax)
 
 void WINAPI DbgOutString(LPCTSTR psz)
 {
+	//if (m_hOutput == INVALID_HANDLE_VALUE) {
+	//	m_hOutput = CreateFile(L"D:\\Development\\Projects\\SWAC.EaglePCApp\\backend\\bin\\driver.log", GENERIC_WRITE,
+	//		FILE_SHARE_READ,
+	//		NULL, OPEN_ALWAYS,
+	//		FILE_ATTRIBUTE_NORMAL,
+	//		NULL);
+	//}
     if (m_hOutput != INVALID_HANDLE_VALUE) {
         UINT  cb = lstrlen(psz);
         DWORD dw;

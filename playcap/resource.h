@@ -8,6 +8,7 @@
 #define IDD_CAPTURE_DEVICES             310
 #define IDC_COMBO1                      1000
 #define IDC_CHECK1                      1001
+#define IDC_COMBO2                      1002
 #define ID_VIEW_CAMERAS                 32771
 
 // Next default values for new objects
@@ -16,7 +17,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        312
 #define _APS_NEXT_COMMAND_VALUE         32772
-#define _APS_NEXT_CONTROL_VALUE         1002
+#define _APS_NEXT_CONTROL_VALUE         1003
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
 #endif

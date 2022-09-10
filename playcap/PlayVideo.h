@@ -3,7 +3,7 @@
 
 extern HWND ghApp;
 
-HRESULT CaptureVideo(IBaseFilter* captureDevice);
+HRESULT CaptureVideo(IBaseFilter* captureDevice, GUID captureMode, int selectedFormat);
 void ResizeVideoWindow(void);
 HRESULT HandleGraphEvent(void);
 void CloseInterfaces(void);
