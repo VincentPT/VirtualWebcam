@@ -270,8 +270,8 @@ HRESULT CCaptureDeviceDlg::ObtainVideoCapbilities(IBaseFilter* pVideoInputDevice
 		if (SUCCEEDED(hr)) {
 			DECLARE_PTR(VIDEOINFOHEADER, pvio, pmt->pbFormat);
 
-			CString frameFormatStr;
-			frameFormatStr.Format(TEXT("%dx%d %dfps"), HEADER(pvio)->biWidth, HEADER(pvio)->biHeight, UNITS/pvio->AvgTimePerFrame);
+			CString frameFormatStr;			
+			frameFormatStr.Format(TEXT("%dx%d(%d bits) %dfps"), HEADER(pvio)->biWidth, HEADER(pvio)->biHeight, HEADER(pvio)->biBitCount, UNITS/pvio->AvgTimePerFrame);
 
 			int idx = cbVideoCaps.AddString(frameFormatStr);
 			//cbVideoCaps.SetItemDataPtr(idx, nullptr);
@@ -282,6 +282,7 @@ HRESULT CCaptureDeviceDlg::ObtainVideoCapbilities(IBaseFilter* pVideoInputDevice
 
 	if (_streamCaps) {
 		cbVideoCaps.SetCurSel(0);
+		OnCbnSelchangeCombo2();
 	}
 
 	SAFE_RELEASE(_pCaptureGraph);    // Capture graph builder object

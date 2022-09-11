@@ -134,6 +134,8 @@ void CMainFrame::OnViewCameras()
 {
     CCaptureDeviceDlg captureDevice;
     if (captureDevice.DoModal() == IDOK) {
+		CloseInterfaces();
+
         auto device = captureDevice.getCaptureDevice();
 		auto captureMode = captureDevice.GetCaptureMode();
 		auto selectedFormat = captureDevice.GetSelectedFormat();
