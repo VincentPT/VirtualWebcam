@@ -154,31 +154,19 @@ HRESULT CaptureVideo(IBaseFilter* captureDevice, GUID captureMode, int selectedF
 		return E_FAIL;
 	}
 
-	HRESULT tmpHr;
 	VIDEO_STREAM_CONFIG_CAPS scc;
 	AM_MEDIA_TYPE* pmt;
-	bool formatSet = false;
-	for (int i = 0; i < _streamCaps; ++i) {
-		pmt = NULL;
-		tmpHr = _streamConf->GetStreamCaps(i, &pmt, (BYTE*)&scc);
-		if (SUCCEEDED(tmpHr)) {
-			if (i == selectedFormat) {
-				tmpHr = _streamConf->SetFormat(pmt);
-				if (SUCCEEDED(hr)) {
-					formatSet = true;
-				}
-				break;
-			}
-
-			DeleteMediaType(pmt);
+	hr = _streamConf->GetStreamCaps(selectedFormat, &pmt, (BYTE*)&scc);
+	if (SUCCEEDED(hr)) {
+		hr = _streamConf->SetFormat(pmt);
+		if (FAILED(hr)) {
+			Msg(TEXT("Couldn't not set the selected format, let the stream be\r\n"));
 		}
+
+		DeleteMediaType(pmt);
 	}
 
 	SAFE_RELEASE(_streamConf);
-
-	if (!formatSet) {
-		Msg(TEXT("Couldn't not set the selected format, let the stream be\r\n"));
-	}
 
     // Render the preview pin on the video capture filter
     // Use this instead of g_pGraph->RenderFile

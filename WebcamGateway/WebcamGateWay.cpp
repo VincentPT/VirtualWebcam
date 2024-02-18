@@ -2,7 +2,7 @@
 #include "WebcamGateWay.h"
 #include "GatewayOutputPin.h"
 
-const wchar_t* PHYSICAL_WEB_CAMERA_NAME = L"HP HD Camera";
+const wchar_t* PHYSICAL_WEB_CAMERA_NAME = L"USB Video Device";
 
 /************************************************************************************************************
 * 
